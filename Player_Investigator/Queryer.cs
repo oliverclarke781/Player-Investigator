@@ -9,24 +9,26 @@ namespace Player_Investigator
 {
     internal class Queryer
     {
+        //https://developer.valvesoftware.com/wiki/Steam_Web_API
         //https://partner.steamgames.com/doc/webapi_overview
         //https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient
         //https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types
         //https://api.steampowered.com/<interface>/<method>/v<version>/
 
-        private HttpClient httpClient = new()
-        {
-            //BaseAddress = new Uri("https://api.steampowered.com"),
-            BaseAddress = new Uri("https://jsonplaceholder.typicode.com"),
-        };
+        private HttpClient httpClient;
 
-        public string output = "";
+        public string output;
 
         //Form functions
 
         public Queryer()
         {
-
+            output = "";
+            httpClient = new()
+            {
+                //BaseAddress = new Uri("https://api.steampowered.com"),
+                BaseAddress = new Uri("https://jsonplaceholder.typicode.com"),
+            };
         }
 
         //Other functions
@@ -36,14 +38,14 @@ namespace Player_Investigator
             using HttpResponseMessage response = await httpClient.GetAsync("todos/3");
 
             response.EnsureSuccessStatusCode();
-            WriteRequestToConsole(response);
+            WriteRequestToOutput(response);
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
             output += jsonResponse;
             //richTextBox1.Text = ($"{jsonResponse}\n");
         }
 
-        private void WriteRequestToConsole(HttpResponseMessage response)
+        private void WriteRequestToOutput(HttpResponseMessage response)
         {
             if (response is null)
             {
