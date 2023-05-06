@@ -8,6 +8,8 @@ namespace Player_Investigator
     {
         Queryer queryer;
 
+        Calculator calculator;
+
         //Form functions
 
         public Form1()
@@ -15,11 +17,13 @@ namespace Player_Investigator
             InitializeComponent();
 
             queryer = new Queryer();
+
+            calculator = new Calculator();
         }
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            await queryer.GetAsync();
+            await queryer.GetAll();
 
             richTextBox1.Text = queryer.output;
         }
