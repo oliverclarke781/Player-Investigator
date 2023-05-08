@@ -16,9 +16,14 @@ namespace Player_Investigator
         {
             InitializeComponent();
 
-            queryer = new Queryer();
+            queryer = new Queryer("", "");
 
             calculator = new Calculator();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -28,9 +33,9 @@ namespace Player_Investigator
             richTextBox1.Text = queryer.output;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
-
+            Close();
         }
     }
 }

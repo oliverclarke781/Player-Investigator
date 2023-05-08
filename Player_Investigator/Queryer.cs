@@ -8,9 +8,28 @@ using System.Text.Json;
 
 namespace Player_Investigator
 {
-    public class GetPlayerSummaryObject
+    internal class GetPlayerSummaryInfo
     {
-        
+        public string? steamid { get; set; }
+        public int? communityvisibilitystate { get; set; }
+        public int? profilestate { get; set; }
+        public string? personaname { get; set; }
+        public string? profileurl { get; set; }
+        public string? avatarfull { get; set; }
+        public int? personastate { get; set; }
+        public string? realname { get; set; }
+        public string? primaryclanid { get; set; }
+        public ulong? timecreated { get; set; }
+        public int? personastateflags { get; set; }
+        public string? loccountrycode { get; set; }
+        public string? locstatecode { get; set; }
+        public int? loccityid { get; set; }
+    }
+
+    internal class GetOwnedGamesInfo
+    {
+        //Figure out which games to do
+        //Apex, CSGO, Dota2
     }
 
     internal class Queryer
@@ -32,15 +51,26 @@ namespace Player_Investigator
         //GetPlayerAchievements/GetUserStatsForGame?
         //GetOwnedGames/GetRecentlyPlayedGames
 
+        //Change to static?
         private HttpClient httpClient;
-
-        public string output;
+        public string key, steamID;
+        public string? output, requestString, getPlayerSummaryResponse, getOwnedGamesResponse;
+        public GetPlayerSummaryInfo? getPlayerSummaryInfo;
+        public GetOwnedGamesInfo? getOwnedGamesInfo;
 
         //Form functions
 
-        public Queryer()
+        public Queryer(string key, string steamID)
         {
-            output = "";
+            this.key = key;
+            this.steamID = steamID;
+            this.key = "4DA0CD7EC93E4167D233CCF091DD4B8F"; //Remove
+            this.steamID = "76561197960435530"; //Remove
+            this.steamID = "76561197960434622";
+
+            //this.steamID = "76561198271851487";
+            //this.steamID = "76561198271791346";
+
             httpClient = new()
             {
                 BaseAddress = new Uri("https://api.steampowered.com"),
@@ -64,29 +94,53 @@ namespace Player_Investigator
 
         public async Task GetAll()
         {
-            await GetPlayerSummary();
+            output = "";
+
+            //GetPlayerSummary
+            requestString = $"ISteamUser/GetPlayerSummaries/v0002/?key={key}&steamids={steamID}";
+            getPlayerSummaryResponse = await GetInfo(requestString, 24, 3); //Indexes needed?
+
+            //if (profile private) break
+
+            //GetOwnedGames
+            requestString = $"IPlayerService/GetOwnedGames/v0001/?key={key}&steamid={steamID}&include_played_free_games=1";
+            getOwnedGamesResponse = await GetInfo(requestString, 0, 0);
+
+            //Create objects with info retrieved
+            getPlayerSummaryInfo = JsonSerializer.Deserialize<GetPlayerSummaryInfo>(getPlayerSummaryResponse);
+            getOwnedGamesInfo = JsonSerializer.Deserialize<GetOwnedGamesInfo>(getOwnedGamesResponse);
+
+            //Create a UserInfo object with all the info retrieved
+            UserInfo userInfo = new(getPlayerSummaryInfo, getOwnedGamesInfo);
+
+
+            //output += userInfo.ToString();
+            //var properties = getPlayerSummaryInfo.GetType().GetProperties();
+            //foreach (var property in properties)
+            //{
+            //    var name = property.Name;
+            //    var value = property.GetValue(getPlayerSummaryInfo);
+            //    output += $"{name}: {value}\n";
+            //}
         }
 
-        public async Task GetPlayerSummary()
+        public async Task<string> GetInfo(string request, int index1, int index2)
         {
-            using HttpResponseMessage response = await httpClient.GetAsync("ISteamUser/GetPlayerSummaries/v0002/?key=4DA0CD7EC93E4167D233CCF091DD4B8F&steamids=76561197960435530");
+            using HttpResponseMessage response = await httpClient.GetAsync(request);
 
+            //try except here
             response.EnsureSuccessStatusCode();
-            WriteRequestToOutput(response);
+            //WriteRequestToOutput(response);
 
-            var jsonResponse = await response.Content.ReadAsStringAsync();
+            string responseString = await response.Content.ReadAsStringAsync();
+            responseString = responseString[index1..(responseString.Length - index2)];
+            //Use replace instead?
+            //Replace(start, "")
+            //jsonResponse = jsonResponse.Replace("]}}", "");
 
-            jsonResponse = jsonResponse.Substring(24);
-            jsonResponse = jsonResponse.Replace("]}}", "");
+            output += responseString;
 
-            var playerDictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
-
-            foreach (var item in playerDictionary)
-            {
-                //item.Value = ToString();
-            }
-
-            output += jsonResponse;
+            return responseString;
         }
 
         private void WriteRequestToOutput(HttpResponseMessage response)
