@@ -88,13 +88,6 @@ namespace Player_Investigator
                         recentlyPlayedScore += 5;
                 }
 
-                if (inventoryCSGO.numOfInvItems != "Unknown" && inventoryCSGO.numOfExtItems != "Unknown")
-                {
-                    inventoryScore = 0;
-                    if (inventoryCSGO.numOfInvItems > 50)
-                        inventoryScore += 2.5;
-                    if (inventoryCSGO.numOfExtItems > 5)
-                        inventoryScore += 2.5;
                 }
                 public void GenerateBaseScore()
                 {
