@@ -1,175 +1,99 @@
-﻿using System;
+﻿using Player_Investigator;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System;
 
 namespace Player_Investigator
 {
-    internal class Calculator
+    public class UserInfo
     {
-        //Calculator code goes here
-        //https://developer.valvesoftware.com/wiki/Steam_Web_API
-        //Check that for all data you could use to consider whether user is a smurf
-        //The methods that I will query will probably be:
-        //GetPlayerSummaries
-        //GetOwnedGames/GetRecentlyPlayedGames
-        //GetFriendList
-        //GetPlayerAchievements/GetUserStatsForGame
-        //So check the return values for those methods
+        // Define your properties for user information here
+        // ...
 
-        //Ideas
-        //Check if avatar is default ?
-        //Check for 2 in name
-        //Check age of account
-        //etc
+        // Example properties:
+        public string SteamID { get; set; }
+        public string Username { get; set; }
+        public int TimePlayed { get; set; }
+        public int NumFriends { get; set; }
+        public int SteamLevel { get; set; }
+        public DateTime AccountCreationDate { get; set; }
+    }
 
-        public Calculator()
+    public class SmurfAccountChecker
+    {
+        private const int MaxScore = 100;
+
+        // Define the weights for each factor
+        private const int TimePlayedWeight = 30;
+        private const int NumFriendsWeight = 20;
+        private const int SteamLevelWeight = 25;
+        private const int AccountAgeWeight = 25;
+
+        // Define the thresholds or criteria for each factor
+        private const int MaxTimePlayed = 100; // Example threshold for high time played
+        private const int MinNumFriends = 10; // Example threshold for low number of friends
+        private const int MinSteamLevel = 10; // Example threshold for low Steam level
+        private const int MaxAccountAgeInDays = 365; // Example threshold for new accounts
+
+        public static double CheckSmurfAccount(
+            int timePlayed, int numFriends, int steamLevel, DateTime accountCreationDate)
         {
-            public void GenerateBaseScore()
-            {
-                if (totalGames != "Unknown" && paidGames != "Unknown" && highestPlayTime != "Unknown" && totalPlayTime != "unkown")
-                {
-                    gameScore = 0;
-                    if (paidGames >= 10)
-                        gameScore += 5;
-                    if (paidGames >= 30)
-                        gameScore += 5;
-                    if (totalGames >= 75)
-                        gameScore += 5;
-                    if (highestPlayTime >= 300)
-                        gameScore += 5;
-                }
+            // Calculate individual scores for each factor
+            int timePlayedScore = CalculateScore(timePlayed, MaxTimePlayed) * TimePlayedWeight;
+            int numFriendsScore = CalculateScore(numFriends, MinNumFriends) * NumFriendsWeight;
+            int steamLevelScore = CalculateScore(steamLevel, MinSteamLevel) * SteamLevelWeight;
+            int accountAgeScore = CalculateAccountAgeScore(accountCreationDate) * AccountAgeWeight;
 
-              
-                }
+            // Calculate the overall score
+            int overallScore = timePlayedScore + numFriendsScore + steamLevelScore + accountAgeScore;
 
-                if (numberOfFriends != "Unknown")
-                {
-                    friendScore = 0;
-                    if (numberOfFriends >= 50)
-                        friendScore += 10;
-                    if (numberOfFriends >= 100)
-                        friendScore += 10;
-                }
+            // Convert the score to a percentage
+            double percentage = (double)overallScore / MaxScore * 100;
 
-                if (steamLevel != "Unknown")
-                {
-                    levelScore = 0;
-                    if (steamLevel >= 5)
-                        levelScore += 2.5;
-                    if (steamLevel >= 10)
-                        levelScore += 5;
-                    if (steamLevel >= 15)
-                        levelScore += 2.5;
-                }
-
-                if (steamBadges != "Unknown")
-                {
-                    badgeScore = 0;
-                    if (steamBadges >= 5)
-                        badgeScore += 2.5;
-                    if (steamBadges >= 10)
-                        badgeScore += 5;
-                    if (steamBadges >= 15)
-                        badgeScore += 2.5;
-                }
-
-                if (recentlyPlayedGames != "No Recently Played Games")
-                {
-                    recentlyPlayedScore = 0;
-                    int t = recentlyPlayedGames.Length;
-                    int a = 0;
-                    if (t >= 2)
-                        recentlyPlayedScore += 5;
-                    foreach (var i in recentlyPlayedGames)
-                        a += i.playtime_2weeks;
-                    if (a > 120)
-                        recentlyPlayedScore += 5;
-                }
-
-                }
-                public void GenerateBaseScore()
-                {
-                    if (totalGames != "Unknown" && paidGames != "Unknown" && highestPlayTime != "Unknown")
-                    {
-                        gameScore = 0;
-                        if (paidGames >= 10)
-                            gameScore += 5;
-                        if (paidGames >= 30)
-                            gameScore += 5;
-                        if (totalGames >= 75)
-                            gameScore += 5;
-                        if (highestPlayTime >= 300)
-                            gameScore += 5;
-                    }
-
-                    }
-
-                    if (numberOfFriends != "Unknown")
-                    {
-                        friendScore = 0;
-                        if (numberOfFriends >= 50)
-                            friendScore += 10;
-                        if (numberOfFriends >= 100)
-                            friendScore += 10;
-                    }
-
-                    if (steamLevel != "Unknown")
-                    {
-                        levelScore = 0;
-                        if (steamLevel >= 5)
-                            levelScore += 2.5;
-                        if (steamLevel >= 10)
-                            levelScore += 5;
-                        if (steamLevel >= 15)
-                            levelScore += 2.5;
-                    }
-
-                    if (steamBadges != "Unknown")
-                    {
-                        badgeScore = 0;
-                        if (steamBadges >= 5)
-                            badgeScore += 2.5;
-                        if (steamBadges >= 10)
-                            badgeScore += 5;
-                        if (steamBadges >= 15)
-                            badgeScore += 2.5;
-                    }
-
-                    if (recentlyPlayedGames != "No Recently Played Games")
-                    {
-                        recentlyPlayedScore = 0;
-                        int t = recentlyPlayedGames.Length;
-                        int a = 0;
-                        if (t >= 2)
-                            recentlyPlayedScore += 5;
-                        foreach (var i in recentlyPlayedGames)
-                            a += i.playtime_2weeks;
-                        if (a > 120)
-                            recentlyPlayedScore += 5;
-                    }
-
-                    if (inventoryCSGO.numOfInvItems != "Unknown" && inventoryCSGO.numOfExtItems != "Unknown")
-                    {
-                        inventoryScore = 0;
-                        if (inventoryCSGO.numOfInvItems > 50)
-                            inventoryScore += 2.5;
-                        if (inventoryCSGO.numOfExtItems > 5)
-                            inventoryScore += 2.5;
-                    }
-
-                    if (playerGroups != "Unknown")
-                    {
-                        groups
-                
-
-                if (playerGroups != "Unknown")
-                {
-                    groups
-            
+            return percentage;
         }
 
-                //Create new function and put calculator code in there
+        private static int CalculateScore(int value, int threshold)
+        {
+            if (value <= threshold)
+            {
+                return MaxScore;
             }
+
+            double ratio = (double)threshold / value;
+            return (int)(MaxScore * ratio);
+        }
+
+        private static int CalculateAccountAgeScore(DateTime accountCreationDate)
+        {
+            TimeSpan age = DateTime.Now - accountCreationDate;
+            int accountAgeInDays = (int)age.TotalDays;
+
+            if (accountAgeInDays <= MaxAccountAgeInDays)
+            {
+                return MaxScore;
+            }
+
+            double ratio = (double)MaxAccountAgeInDays / accountAgeInDays;
+            return (int)(MaxScore * ratio);
+        }
+    }
+
+    public class Program
+    {
+        public static void Main()
+        {
+            // Example usage
+            int timePlayed = 50;
+            int numFriends = 5;
+            int steamLevel = 8;
+            DateTime accountCreationDate = new DateTime(2022, 1, 1);
+
+            double smurfPercentage = SmurfAccountChecker.CheckSmurfAccount(timePlayed, numFriends, steamLevel, accountCreationDate);
+            Console.WriteLine($"Likelihood of smurf account: {smurfPercentage}%");
+        }
+    }
 }
